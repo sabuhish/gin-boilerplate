@@ -1,11 +1,8 @@
 package api
 
 import (
-	"context"
 	"gin-boilerplate/models"
-	"gin-boilerplate/pkg/validators"
 	"gin-boilerplate/repository"
-	"gin-boilerplate/service"
 
 	"net/http"
 
@@ -20,138 +17,41 @@ func Ping(c *gin.Context) {
 }
 
 type UserService interface {
-	Createuser(ctx context.Context)
-	GetUser(ctx context.Context)
-	DeleteUser(ctx context.Context)
-	UpdateUser(ctx context.Context)
+	Createuser(m models.User) (models.User, error)
+	GetUser(m models.User) (*models.User, error)
+	DeleteUser(m models.User) error
+	UpdateUser(m models.User) (*models.User, error)
 }
 
 type UserHandler struct {
 	UserRepo repository.UserRepository
 }
 
-func (u *UserHandler) Createuser(c *gin.Context) {
+func (u *UserHandler) Createuser(m models.User) (models.User, error) {
 
-	var uservalidate validators.UserValidator
+	_, err := u.UserRepo.Create(&m)
 
-	err := c.ShouldBindJSON(&uservalidate)
-
-	if err != nil {
-		service.HTTPResponse(c, http.StatusNotFound, "error", err.Error())
-		c.Abort()
-		return
-	}
-
-	operation := models.User{
-		Age:         uservalidate.Age,
-		Name:        uservalidate.Name,
-		Username:    uservalidate.Username,
-		Email:       uservalidate.Email,
-		PhoneNumber: uservalidate.PhoneNumber}
-
-	_, somerror := u.UserRepo.Create(&operation)
-
-	if somerror != nil {
-		service.HTTPResponse(c, http.StatusNotFound, "error", somerror)
-		c.Abort()
-		return
-	}
-
-	service.HTTPResponse(c, http.StatusOK, "success", service.UserData(uservalidate))
-
-	c.Abort()
-	return
+	return m, err
 }
 
-func (u *UserHandler) GetUser(c *gin.Context) {
-	var uri validators.UserUriValidator
-	var user models.User
+func (u *UserHandler) GetUser(m *models.User, uri string) (*models.User, error) {
 
-	err := service.CheckUUID(c, &uri)
+	err := u.UserRepo.GetOne(m, uri)
 
-	if err != nil {
-
-		service.HTTPResponse(c, http.StatusNotFound, "error", err.Error())
-
-		c.Abort()
-		return
-	}
-
-	err = u.UserRepo.GetOne(&user, uri.ID)
-
-	if err != nil {
-		service.HTTPResponse(c, http.StatusNotFound, "error", err.Error())
-		c.Abort()
-		return
-	}
-
-	service.HTTPResponse(c, http.StatusOK, "success", map[string]interface{}{
-		"id":          user.ID,
-		"name":        user.Name,
-		"age":         user.Age,
-		"email":       user.Email,
-		"phone_numer": user.PhoneNumber,
-		"username":    user.Username})
-
+	return m, err
 }
 
-func (u *UserHandler) DeleteUser(c *gin.Context) {
+func (u *UserHandler) DeleteUser(m *models.User, uri string) error {
 
-	var uri validators.UserUriValidator
-	var user models.User
+	err := u.UserRepo.Delete(m, uri)
 
-	err := service.CheckUUID(c, &uri)
-
-	if err != nil {
-
-		service.HTTPResponse(c, http.StatusNotFound, "error", err.Error())
-
-		c.Abort()
-		return
-	}
-
-	err = u.UserRepo.Delete(&user, uri.ID)
-
-	if err != nil {
-		service.HTTPResponse(c, http.StatusNotFound, "error", err.Error())
-
-		c.Abort()
-		return
-	}
-	service.HTTPResponse(c, http.StatusOK, service.SuccessMessage, "Succefuly deleted")
+	return err
 }
 
-func (u *UserHandler) UpdateUser(c *gin.Context) {
-	var uri validators.UserUriValidator
+func (u *UserHandler) UpdateUser(m *models.User, uri string)  (*models.User, error){
 
-	err := service.CheckUUID(c, &uri)
+	err := u.UserRepo.Update(m, uri)
 
-	if err != nil {
-
-		service.HTTPResponse(c, http.StatusNotFound, service.ErrorMessage, err.Error())
-
-		c.Abort()
-		return
-	}
-
-	user := models.User{}
-
-	err = u.UserRepo.Update(&user, uri.ID)
-
-	if err != nil {
-
-		service.HTTPResponse(c, http.StatusNotFound, service.ErrorMessage, err.Error())
-		c.Abort()
-		return
-	}
-	c.BindJSON(&user)
-
-	service.HTTPResponse(c, http.StatusOK, service.SuccessMessage, map[string]interface{}{
-		"id":          user.ID,
-		"name":        user.Name,
-		"age":         user.Age,
-		"email":       user.Email,
-		"phone_numer": user.PhoneNumber,
-		"username":    user.Username})
+	return m, err
 
 }

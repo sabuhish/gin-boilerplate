@@ -20,11 +20,11 @@ type DBUserRepositoty struct{}
 
 func (o *DBUserRepositoty) Create(u *models.User) (*models.User, error) {
 
-	result := database.DB.Create(u)
+	result := database.DB.Create(&u)
 
 	if result.Error != nil {
 		fmt.Println(result.Error)
-		return nil, errors.New("Cannot crete user")
+		return u, errors.New("Cannot crete user")
 	}
 	return u, nil
 }
@@ -59,7 +59,7 @@ func (o *DBUserRepositoty) Update(u *models.User, id string) error {
 		return err
 	}
 
-	database.DB.Save(u)
+	database.DB.Save(&u)
 
 	return nil
 }
