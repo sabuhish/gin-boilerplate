@@ -2,7 +2,7 @@
 
 ## Gin-BoilerPlate
 
-This simple ready development and production microservice boilerplate is designed for gin framework. Throught this library I have used, go-arg for argument parsing and getting variables from env, logrus for logging operation either within json or txt format (also can write to the file as well), gorm for database operations, testify for testing.
+This simple ready development and production microservice boilerplate is designed for [gin framework](https://github.com/gin-gonic/gin). Throught this library I have used, [go-arg](https://github.com/alexflint/go-arg) for argument parsing and getting variables from env, [Logrus](https://github.com/sirupsen/logrus) for logging operation either within json or txt format (also can write to the file as well), [gorm](https://github.com/go-gorm/gorm) for database operations, [testify](https://github.com/stretchr/testify) for testing.
 
 Features:
 swagger documentation will be added, testing will be enhanced.
